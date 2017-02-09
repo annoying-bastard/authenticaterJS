@@ -4,19 +4,22 @@ var User = require('../models/user');
 //
 // needs to sanitize the provided data and actually respond to all possible inputs
 // (ie typos, no user found, required fields etc.)
+// ? is there a way to (res.)set 'info' to the corresponding value w/o rerendering the form? there must be right?
 
 exports.user_get_post = function (req, res, next) {
+  console.log('user controller USER GET POST accessed');
   User.findOne({ 'username': req.body.username }, 'username password', function(err, user){
       if (err) {
         return next(err);
       } else if (!user) {
-        res.send("User not found.");
+        console.log('user not found');
+        res.render('login', { info: "NOT IMPLEMENTED: session middleware /// User not found." });
       } else if (user.password === req.body.password){
-        res.send("while the server accepted your login, this doesn't benefit you in any way as of yet");
+        res.render('login', { info: "NOT IMPLEMENTED: session middleware /// while the server accepted your login, this doesn't benefit you in any way as of yet" });
       } else if (user.password != req.body.password){
-        res.send("You provided the wrong Password");
+        res.render('login', { info: "NOT IMPLEMENTED: session middleware /// You provided the wrong Password" });
       } else {
-        res.send("Apparently something went wrong, this is embarassing.");
+        res.render('login', { info: "NOT IMPLEMENTED: session middleware /// Apparently something went wrong, this is embarassing." });
       }
   })
 
