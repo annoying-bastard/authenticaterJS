@@ -4,10 +4,10 @@ var user_controller = require('../controllers/userController');
 
 // GET login
 router.get('/', function (req, res, next) {
-  console.log('login route accessed');
   res.render('login');
 });
 
+//POST login --> user controller
 router.post('/', user_controller.user_get_post);
 
 

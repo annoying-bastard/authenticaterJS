@@ -4,7 +4,6 @@ var user_controller = require('../controllers/userController');
 
 // GET signup
 router.get('/', function (req, res, next) {
-  console.log('signup route accessed');
   res.render('signup');
 })
 
