@@ -8,7 +8,7 @@ var UserSchema = Schema(
   }
 );
 
-AuthorSchema
+UserSchema
 .virtual('url')
 .get(function (){
   return '/user/' + this._id;
