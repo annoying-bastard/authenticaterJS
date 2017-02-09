@@ -2,8 +2,6 @@ var User = require('../models/user');
 
 // USER GET by POST finds the provided usernames corresponding database object and validates the password
 //
-// needs to sanitize the provided data and actually respond to all possible inputs
-// (ie typos, no user found, required fields etc.)
 // ? is there a way to (res.)set 'info' to the corresponding value w/o rerendering the form? there must be right?
 
 exports.user_get_post = function (req, res, next) {
@@ -11,13 +9,15 @@ exports.user_get_post = function (req, res, next) {
   // VALIDATION of req.body.username
   // i have a feeling this is not good practice at all.
   // maybe export the validation into ../validations/login.js?
-  req.checkBody('username', 'invalid username').isAlpha().isEmpty()
+  req.checkBody('username', 'invalid username').isAlpha()
   var errors = req.validationErrors();
   if (errors) {  res.render('login', { info: "username can only contain alphanumeric characters" }) }
 
   // if errors is true the response ends with an error message
   // so i feel it's save to omit the else statement for clarity reasons
+  // also: isn't this a blocking operation? async.js? i dont quite understand blocking yet.
   // VALID DATA so process:
+
   User.findOne({ 'username': req.body.username }, 'username password', function(err, user){
     if (err) {
       return next(err);
