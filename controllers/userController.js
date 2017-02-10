@@ -1,5 +1,4 @@
 var User = require('../models/user');
-
 // USER GET by POST finds the provided usernames corresponding database object and validates the password
 //
 // ? is there a way to (res.)set 'info' to the corresponding value w/o rerendering the form? there must be right?
@@ -40,5 +39,18 @@ exports.user_get_post = function (req, res, next) {
 // push a new user object into the database. needs to initialize email verification process.
 
 exports.user_register_post = function (req, res, next) {
-  res.send('NOT IMPLEMENTED: User signup process controller');
+
+  req.checkBody('username', 'username needs to be alphanumeric').isAlpha();
+  req.checkBody('password1', 'password needs to be alphanumeric').isAlpha();
+  req.checkBody('email', 'password needs to be alphanumeric').isEmail();
+
+    var errorsObjectParsed = function () {
+      var errorsObject = req.validationErrors();
+      var results = []
+      for (k in errorsObject) {
+        results.push(errorsObject[k].msg);
+      }
+      return results;
+    }
+    res.render('signup', {  info: errorsObjectParsed()  });
 }
