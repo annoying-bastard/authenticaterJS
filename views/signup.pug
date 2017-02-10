@@ -19,26 +19,29 @@ block content
         tr
           td
             div.form-group
-              label(for='password') Password:
+              label(for='password1') Password:
           td
            input#password1.form-control(required='true', value='somepw', type='password', name='password1')
         tr
           td
             div.form-group
-              label(for='password') Confirm Password:
+              label(for='password2') Confirm Password:
           td
             input#password2.form-control(required='true', value='somepw', type='password', name='password2')
         tr
           td
             div.form-group
-              label(for='password') E-mail Address:
+              label(for='email') E-mail Address:
           td
             input#email.form-control(required='true', value='some@ema.il', type='email', name='email')
       br
       button.btn.btn-primary(type='submit') Sign up
     a(class='button' href='/login') Log in
     div(style="color: red")
-      ul
-        if info
-        each key in info
-          li=key
+
+      -if(typeof info === 'string')
+        p=info
+      - else
+        ul
+          each key in info
+            li=key
