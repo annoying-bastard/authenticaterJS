@@ -1,5 +1,5 @@
 var User = require('../models/user');
-
+var async = require('async');
 
 var errorsParser = function (req) {
   let errors = req.validationErrors();
@@ -48,7 +48,6 @@ exports.user_register_post = function (req, res, next) {
     req.checkBody('password1', 'Password needs to be alphanumeric').isAlpha();
     req.checkBody('email', 'E-mail needs to be a valid email address').isEmail();
     let errors = errorsParser(req, res, next);
-    console.log(errors);
     if (errors.length<0) {
       res.render('signup', {  info: errors  });
     }
@@ -56,43 +55,62 @@ exports.user_register_post = function (req, res, next) {
     // those are so ugly... there must be a better way to do this.
     // oh got this doesn't work at all... i don't know how to use
     // User.findOne({},'', (err, user) => {user.username outside of this function})
-    User.findOne({  'username': req.body.username  }, 'username', function(err, user){
-      if (err) {  return next(err);
-      } else {
-        if(user != null) {
-          if (user.username === req.body.username){
-            res.render('signup', {  info: 'Username is already taken' });
-          }
-        }
-      }
-    });
-
-    User.findOne({  'email': req.body.email  }, 'email', function(err, user){
-      if (err) {  return next(err);
-      } else {
-        if (user != null) {
-          if (user.email === req.body.email) {
-            res.render('signup', {  info: 'The E-mail address you provided is alrady taken.' });
-          }
-        }
-      }
-    });
-
-    if (req.body.password1 != req.body.password2) {
-      res.render('signup', {  info: 'The passwords you provide need to match' });
-    } else {
-      let newUser = new User({
-        username: req.body.username,
-        password: req.body.password1,
-        email: req.body.email
-      });
-      newUser.save(function (err, newUser) {
-        if (err) {
-          res.render('signup', {  info: 'So sorry. a database operation went wrong. :('});
-          return console.error(err);
+    var results = {};
+    async.parallel({
+        username: function(callback) {
+          User.findOne({  'username': req.body.username  }, 'username', function(err, user){
+            if (err) {  return next(err);
+            } else {
+              if(user != null) {
+                if (user.username === req.body.username){
+                  callback(err, 'Username is already taken');
+                }
+              } else {
+                callback();
+              }
+            }
+          })
+        },
+        email: function(callback) {
+          User.findOne({  'email': req.body.email  }, 'email', function(err, user){
+            if (err) {  return next(err);
+            } else {
+              if (user != null) {
+                if (user.email === req.body.email) {
+                  callback(err, 'The E-mail address is alrady taken.');
+              }
+            } else {
+              callback();
+            }
+            }
+          })
+        },
+      }, function(err, asyncResults) {
+        console.log(asyncResults);
+        if (err) {  return next(err);
+        } else if (asyncResults.username) {
+          res.render('signup', {  info:  asyncResults.username});
+          return;
+        } else if (asyncResults.email) {
+          res.render('signup', {  info:  asyncResults.email});
+          return;
+        } else if (req.body.password1 != req.body.password2) {
+          res.render('signup', {  info: 'The passwords you provide need to match' });
         } else {
-        res.render('signup', {  info: 'Signup successful. you can now log in using your username and password.' });
+          let newUser = new User({
+            username: req.body.username,
+            password: req.body.password1,
+            email: req.body.email
+          });
+          newUser.save(function (err, newUser) {
+            if (err) {
+              res.render('signup', {  info: 'So sorry. a database operation went wrong. :('});
+              return console.error(err);
+            } else {
+              res.render('signup', {  info: 'Signup successful. you can now log in using your username and password.' });
+            }
+          });
         }
       });
-    }
+
 }
