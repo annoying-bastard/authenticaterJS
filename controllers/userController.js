@@ -48,10 +48,14 @@ exports.user_register_post = function (req, res, next) {
     req.checkBody('password1', 'Password needs to be alphanumeric').isAlpha();
     req.checkBody('email', 'E-mail needs to be a valid email address').isEmail();
     let errors = errorsParser(req, res, next);
+    console.log(errors);
     if (errors.length<0) {
       res.render('signup', {  info: errors  });
     }
 
+    // those are so ugly... there must be a better way to do this.
+    // oh got this doesn't work at all... i don't know how to use
+    // User.findOne({},'', (err, user) => {user.username outside of this function})
     User.findOne({  'username': req.body.username  }, 'username', function(err, user){
       if (err) {  return next(err);
       } else {
