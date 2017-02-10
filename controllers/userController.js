@@ -47,10 +47,7 @@ exports.user_register_post = function (req, res, next) {
     req.checkBody('username', 'Username needs to be alphanumeric').isAlpha();
     req.checkBody('password1', 'Password needs to be alphanumeric').isAlpha();
     req.checkBody('email', 'E-mail needs to be a valid email address').isEmail();
-    let errors = errorsParser(req, res, next);
-    if (errors.length<0) {
-      res.render('signup', {  info: errors  });
-    }
+
 
     // those are so ugly... there must be a better way to do this.
     // oh got this doesn't work at all... i don't know how to use
@@ -63,7 +60,7 @@ exports.user_register_post = function (req, res, next) {
             } else {
               if(user != null) {
                 if (user.username === req.body.username){
-                  callback(err, 'Username is already taken');
+                  callback(err, 'Username is already taken.');
                 }
               } else {
                 callback();
@@ -78,7 +75,7 @@ exports.user_register_post = function (req, res, next) {
               if (user != null) {
                 if (user.email === req.body.email) {
                   callback(err, 'The E-mail address is alrady taken.');
-              }
+                }
             } else {
               callback();
             }
@@ -86,13 +83,16 @@ exports.user_register_post = function (req, res, next) {
           })
         },
       }, function(err, asyncResults) {
-        console.log(asyncResults);
+        let errors = errorsParser(req, res, next);
         if (err) {  return next(err);
+        } else if (errors.length>0) {
+          res.render('signup', { info: errors })
         } else if (asyncResults.username) {
-          res.render('signup', {  info:  asyncResults.username});
+          console.log(asyncResults);
+          res.render('signup', {  info:  asyncResults});
           return;
         } else if (asyncResults.email) {
-          res.render('signup', {  info:  asyncResults.email});
+          res.render('signup', {  info:  asyncResults});
           return;
         } else if (req.body.password1 != req.body.password2) {
           res.render('signup', {  info: 'The passwords you provide need to match' });

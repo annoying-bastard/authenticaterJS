@@ -39,9 +39,6 @@ block content
     a(class='button' href='/login') Log in
     div(style="color: red")
 
-      -if(typeof info === 'string')
-        p=info
-      - else
-        ul
-          each key in info
-            li=key
+      ul
+        each key in info
+          li=key
