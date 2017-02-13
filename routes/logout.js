@@ -4,16 +4,12 @@ var user_controller = require('../controllers/userController');
 
 // GET login
 router.get('/', function (req, res, next) {
-  if(req.session.loggedIn) {
-    res.redirect('logout');
-  } else {
-    res.render('login');
-  }
+  res.render('logout', {  info: 'You are already logged in!'  });
 
 });
 
 //POST login --> user controller
-router.post('/', user_controller.user_get_post);
+router.post('/', user_controller.user_logout_post);
 
 
 module.exports = router;

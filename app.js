@@ -6,12 +6,13 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var expressValidator = require('express-validator');
+var session = require('express-session');
 var index = require('./routes/index');
 var users = require('./routes/users');
 var login = require('./routes/login');
 var signup = require('./routes/signup');
+var logout = require('./routes/logout');
 var app = express();
-
 
 //establish database connection
 var mongoDB = '127.0.0.1/authenticater';
@@ -31,12 +32,21 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(expressValidator());
+app.use(expressValidator(
+  {
+    customValidators: {
+      isEqual: function (val1, val2) {
+        return val1 === val2
+      }
+    }
+  }
+));
+app.use(session({ secret: 'superdude', resave: false, saveUninitialized: false }));
 app.use('/', index);
 app.use('/users', users);
 app.use('/login', login);
 app.use('/signup', signup);
-
+app.use('/logout', logout);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

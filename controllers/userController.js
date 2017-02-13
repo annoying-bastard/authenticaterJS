@@ -1,5 +1,6 @@
 var User = require('../models/user');
 var async = require('async');
+var uuid = require('uuid');
 
 var errorsParser = function (req) {
   let errors = req.validationErrors();
@@ -18,17 +19,14 @@ exports.user_get_post = function (req, res, next) {
   let errors = errorsParser(req, res, next);
   if (errors.length>0) {  res.render('login', { info: errors }) }
 
-  // if errors is true the response ends with an error message
-  // also: isn't this a blocking operation? async.js? i dont quite understand blocking yet.
-  // VALID DATA so process:
-
   User.findOne({ 'username': req.body.username }, 'username password', function(err, user){
     if (err) {
       return next(err);
     } else if (!user) {
       res.render('login', { info: "User not found." });
     } else if (user.password === req.body.password){
-      res.render('login', { info: "While the server accepted your login, this doesn't benefit you in any way as of yet" });
+      req.session.loggedIn = true;
+      res.render('logout', { info: "you successfully logged in!" });
     } else if (user.password != req.body.password){
       res.render('login', { info: "You provided the wrong Password" });
     } else {
@@ -47,12 +45,8 @@ exports.user_register_post = function (req, res, next) {
     req.checkBody('username', 'Username needs to be alphanumeric').isAlpha();
     req.checkBody('password1', 'Password needs to be alphanumeric').isAlpha();
     req.checkBody('email', 'E-mail needs to be a valid email address').isEmail();
+    req.checkBody('password2', 'Passwords need to match').isEqual(req.body.password1);
 
-
-    // those are so ugly... there must be a better way to do this.
-    // oh got this doesn't work at all... i don't know how to use
-    // User.findOne({},'', (err, user) => {user.username outside of this function})
-    var results = {};
     async.parallel({
         username: function(callback) {
           User.findOne({  'username': req.body.username  }, 'username', function(err, user){
@@ -94,8 +88,6 @@ exports.user_register_post = function (req, res, next) {
         } else if (asyncResults.email) {
           res.render('signup', {  info:  asyncResults});
           return;
-        } else if (req.body.password1 != req.body.password2) {
-          res.render('signup', {  info: 'The passwords you provide need to match' });
         } else {
           let newUser = new User({
             username: req.body.username,
@@ -107,10 +99,14 @@ exports.user_register_post = function (req, res, next) {
               res.render('signup', {  info: 'So sorry. a database operation went wrong. :('});
               return console.error(err);
             } else {
-              res.render('signup', {  info: 'Signup successful. you can now log in using your username and password.' });
+              res.render('signup', {  info: ['Signup successful. you can now log in using your username and password.'] });
             }
           });
         }
       });
+}
 
+exports.user_logout_post = function (req, res, next) {
+  req.session.destroy();
+  res.redirect('/');
 }
