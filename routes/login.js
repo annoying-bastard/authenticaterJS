@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 var user_controller = require('../controllers/userController');
 
-// GET login
 router.get('/', function (req, res, next) {
   if(req.session.loggedIn) {
     res.redirect('logout');
@@ -12,7 +11,6 @@ router.get('/', function (req, res, next) {
 
 });
 
-//POST login --> user controller
 router.post('/', user_controller.user_get_post);
 
 
